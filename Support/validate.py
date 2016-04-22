@@ -106,16 +106,19 @@ def validate(quiet=False):
         args.append('--stdin-filename')
         args.append(os.path.basename(os.environ['TM_FILEPATH']))
 
+    project_dir = os.environ.get('TM_PROJECT_DIRECTORY', None)
+    node_modules = project_dir + '/node_modules/.bin'
+
     # the working directory; used by eslint to find its config files
-    cwd = os.environ.get('TM_DIRECTORY', None)
-    if not cwd:
-        cwd = os.environ.get('TM_PROJECT_DIRECTORY', None)
+    cwd = os.environ.get('TM_DIRECTORY', None) or project_dir
 
     # Build env for our command: ESLint (and Node) are often
     # installed to /usr/local/bin, which may not be on the
     # bundle’s PATH in a default install of TextMate.
     env = os.environ.copy()
     path_parts = env['PATH'].split(':')
+    if node_modules not in path_parts:
+        path_parts.append(node_modules)
     if '/bin' not in path_parts:
         path_parts.append('/bin')
     if '/usr/bin' not in path_parts:
